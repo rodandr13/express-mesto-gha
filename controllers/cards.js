@@ -27,6 +27,9 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndDelete(cardId)
     .then((card) => {
+      if (!card) {
+        throw new Error();
+      }
       res.send(card);
     })
     .catch((error) => {
@@ -38,6 +41,9 @@ const likeCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
+      if (!card) {
+        throw new Error();
+      }
       res.send(card);
     })
     .catch((error) => {
@@ -49,6 +55,9 @@ const dislikeCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
+      if (!card) {
+        throw new Error();
+      }
       res.send(card);
     })
     .catch((error) => {
