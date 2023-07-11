@@ -34,8 +34,32 @@ const deleteCard = (req, res) => {
     });
 };
 
+const likeCard = (req, res) => {
+  const { cardId } = req.params;
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .then((card) => {
+      res.send(card);
+    })
+    .catch((error) => {
+      res.status(400).send(error);
+    });
+};
+
+const dislikeCard = (req, res) => {
+  const { cardId } = req.params;
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .then((card) => {
+      res.send(card);
+    })
+    .catch((error) => {
+      res.status(400).send(error);
+    });
+};
+
 module.exports = {
   createCard,
   getCards,
   deleteCard,
+  likeCard,
+  dislikeCard,
 };
