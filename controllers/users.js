@@ -4,7 +4,6 @@ const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      console.log('создался');
       res.send(user);
     })
     .catch((error) => {
@@ -26,6 +25,9 @@ const getUser = (req, res) => {
   const { id } = req.params;
   User.findById(id)
     .then((user) => {
+      if (!user) {
+        throw new Error();
+      }
       res.send(user);
     })
     .catch((error) => {

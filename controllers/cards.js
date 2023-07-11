@@ -32,8 +32,8 @@ const deleteCard = (req, res) => {
       }
       res.send(card);
     })
-    .catch((error) => {
-      res.status(400).send(error);
+    .catch(() => {
+      res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
     });
 };
 
