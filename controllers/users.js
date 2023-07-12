@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const {NotFoundError} = require("../errors/NotFoundError");
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
@@ -7,7 +8,11 @@ const createUser = (req, res) => {
       res.send(user);
     })
     .catch((error) => {
-      res.status(400).send(error);
+      if (error.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        return;
+      }
+      res.status(500).send({ message: error.message });
     });
 };
 
@@ -17,7 +22,7 @@ const getUsers = (req, res) => {
       res.send(users);
     })
     .catch((error) => {
-      res.status(400).send(error);
+      res.status(500).send({ message: error.message });
     });
 };
 
@@ -26,12 +31,20 @@ const getUser = (req, res) => {
   User.findById(id)
     .then((user) => {
       if (!user) {
-        throw new Error();
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
       }
       res.send(user);
     })
     .catch((error) => {
-      res.status(400).send(error);
+      if (error.name === 'NotFoundError') {
+        res.status(error.statusCode).send({ message: error.message });
+        return;
+      }
+      if (error.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные.' });
+        return;
+      }
+      res.status(500).send({ message: error.message });
     });
 };
 
@@ -52,10 +65,21 @@ const updateAvatar = (req, res) => {
   const userId = req.user._id;
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
+      }
       res.send(user);
     })
     .catch((error) => {
-      res.status(400).send(error);
+      if (error.name === 'NotFoundError') {
+        res.status(error.statusCode).send({ message: error.message });
+        return;
+      }
+      if (error.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные.' });
+        return;
+      }
+      res.status(500).send({ message: error.message });
     });
 };
 

@@ -9,7 +9,7 @@ const createCard = (req, res) => {
       res.send(card);
     })
     .catch((error) => {
-      if (error.name === 'CastError') {
+      if (error.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
         return;
       }
