@@ -41,6 +41,7 @@ const getUsers = (req, res) => {
 
 const login = (req, res) => {
   const {email, password} = req.body;
+
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
@@ -54,7 +55,8 @@ const login = (req, res) => {
         sameSite: true,
       }).send({token});
     })
-    .catch(() => {
+    .catch((error) => {
+      console.log(error.message);
       res.send({message: 'errorrrrrrrrrrrrr'});
     });
 };
