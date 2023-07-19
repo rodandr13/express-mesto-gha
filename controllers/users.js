@@ -1,10 +1,26 @@
 const User = require('../models/user');
-const { NotFoundError } = require('../errors/NotFoundError');
-const { handleErrors } = require('../utils/utils');
+const {NotFoundError} = require('../errors/NotFoundError');
+const {handleErrors} = require('../utils/utils');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => {
       res.send(user);
     })
@@ -23,8 +39,28 @@ const getUsers = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const {email, password} = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        {_id: user._id},
+        'super-strong-secret',
+        {expiresIn: '7d'},
+      );
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: true,
+      }).send({token});
+    })
+    .catch(() => {
+      res.send({message: 'errorrrrrrrrrrrrr'});
+    });
+};
+
 const getUser = (req, res) => {
-  const { id } = req.params;
+  const {id} = req.params;
   User.findById(id)
     .then((user) => {
       if (!user) {
@@ -38,9 +74,9 @@ const getUser = (req, res) => {
 };
 
 const updateUser = (req, res) => {
-  const { name, about } = req.body;
+  const {name, about} = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(userId, {name, about}, {new: true, runValidators: true})
     .then((user) => {
       res.send(user);
     })
@@ -50,9 +86,9 @@ const updateUser = (req, res) => {
 };
 
 const updateAvatar = (req, res) => {
-  const { avatar } = req.body;
+  const {avatar} = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(userId, {avatar}, {new: true, runValidators: true})
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
@@ -66,6 +102,7 @@ const updateAvatar = (req, res) => {
 
 module.exports = {
   createUser,
+  login,
   getUsers,
   getUser,
   updateUser,
