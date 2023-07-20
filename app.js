@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const auth = require('./middlewares/auth');
 const {login, createUser} = require('./controllers/users');
 
 const app = express();
@@ -20,8 +21,8 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
 app.use('/signin', login);
 app.use('/signup', createUser);
 app.use((req, res) => {
