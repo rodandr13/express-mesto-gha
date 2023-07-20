@@ -26,6 +26,19 @@ const getCards = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
+  Card.findById(cardId)
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка с указанным _id не найдена.');
+      }
+      if (card.owner.toString() !== req.user._id) {
+        throw new NotFoundError('Нет прав.');
+      }
+      return Card.findByIdAndDelete(cardId);
+    })
+    .catch((error) => {
+      handleErrors(res, error);
+    });
 
   Card.findByIdAndDelete(cardId)
     .then((card) => {
