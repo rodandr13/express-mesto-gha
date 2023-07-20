@@ -102,6 +102,17 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const getCurrentUser = ((req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((error) => {
+      handleErrors(res, error);
+    });
+});
+
 module.exports = {
   createUser,
   login,
@@ -109,4 +120,5 @@ module.exports = {
   getUser,
   updateUser,
   updateAvatar,
+  getCurrentUser,
 };
