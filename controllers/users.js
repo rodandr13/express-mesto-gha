@@ -1,10 +1,11 @@
-const User = require('../models/user');
-const {NotFoundError} = require('../errors/NotFoundError');
-const {handleErrors} = require('../utils/utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const createUser = (req, res) => {
+const User = require('../models/user');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { handleErrors } = require('../utils/utils');
+
+const createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -24,45 +25,38 @@ const createUser = (req, res) => {
     .then((user) => {
       res.send(user);
     })
-    .catch((error) => {
-      handleErrors(res, error);
-    });
+    .catch(next);
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send(users);
     })
-    .catch((error) => {
-      handleErrors(res, error);
-    });
+    .catch(next);
 };
 
-const login = (req, res) => {
-  const {email, password} = req.body;
+const login = (req, res, next) => {
+  const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
-        {_id: user._id},
+        { _id: user._id },
         'super-strong-secret',
-        {expiresIn: '7d'},
+        { expiresIn: '7d' },
       );
       res.cookie('jwt', token, {
         maxAge: 3600000,
         httpOnly: true,
         sameSite: true,
-      }).send({token});
+      }).send({ token });
     })
-    .catch((error) => {
-      console.log(error.message);
-      res.send({message: 'errorrrrrrrrrrrrr'});
-    });
+    .catch(next);
 };
 
-const getUser = (req, res) => {
-  const {id} = req.params;
+const getUser = (req, res, next) => {
+  const { id } = req.params;
   User.findById(id)
     .then((user) => {
       if (!user) {
@@ -70,36 +64,33 @@ const getUser = (req, res) => {
       }
       res.send(user);
     })
-    .catch((error) => {
-      handleErrors(res, error);
-    });
+    .catch(next);
 };
 
-const updateUser = (req, res) => {
-  const {name, about} = req.body;
+const updateUser = (req, res, next) => {
+  const { name, about } = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(userId, {name, about}, {new: true, runValidators: true})
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((error) => {
-      handleErrors(res, error);
-    });
-};
-
-const updateAvatar = (req, res) => {
-  const {avatar} = req.body;
-  const userId = req.user._id;
-  User.findByIdAndUpdate(userId, {avatar}, {new: true, runValidators: true})
+  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
       }
       res.send(user);
     })
-    .catch((error) => {
-      handleErrors(res, error);
-    });
+    .catch(next);
+};
+
+const updateAvatar = (req, res, next) => {
+  const { avatar } = req.body;
+  const userId = req.user._id;
+  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
+      }
+      res.send(user);
+    })
+    .catch(next);
 };
 
 const getCurrentUser = ((req, res, next) => {

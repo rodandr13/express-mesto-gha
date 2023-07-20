@@ -5,11 +5,11 @@ const { celebrate, Joi, errors } = require('celebrate');
 const helmet = require('helmet');
 require('dotenv').config();
 
+const rateLimit = require('express-rate-limit');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
-const {login, createUser} = require('./controllers/users');
-const rateLimit = require('express-rate-limit');
+const { login, createUser } = require('./controllers/users');
 
 const app = express();
 const { PORT = 3000, MONGODB_URI = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
@@ -34,7 +34,7 @@ app.use(
       name: Joi.string().required().min(2).max(30),
       about: Joi.string().min(2).max(30),
       avatar: Joi.string().pattern(
-        /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/gi,
+        /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i,
       ),
     }),
   }),
@@ -45,7 +45,6 @@ app.use((req, res) => {
 });
 app.use(errors());
 app.use((err, req, res, next) => {
-  console.log('попал в ошибку мидлваре');
   res.status(500).send({ message: err.message });
   next();
 });
