@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const { NotFoundError } = require('../errors/NotFoundError');
-const { handleErrors } = require('../utils/utils');
 
 const createUser = (req, res, next) => {
   const {
