@@ -1,5 +1,4 @@
 const Card = require('../models/card');
-const { handleErrors } = require('../utils/utils');
 const { NotFoundError } = require('../errors/NotFoundError');
 const { ForbiddenError } = require('../errors/ForbiddenError');
 
@@ -32,6 +31,9 @@ const deleteCard = (req, res, next) => {
         throw new ForbiddenError('Нет прав...');
       }
       return Card.findByIdAndDelete(cardId);
+    })
+    .then((card) => {
+      res.send(card);
     })
     .catch(next);
 
