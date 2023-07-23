@@ -22,8 +22,6 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
-app.use('/users', usersRouter);
-app.use('/cards', auth, cardsRouter);
 app.use(
   '/signin',
   celebrate({
@@ -40,7 +38,7 @@ app.use(
     body: Joi.object().keys({
       email: Joi.string().required().email(),
       password: Joi.string().required().min(8),
-      name: Joi.string().required().min(2).max(30),
+      name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
       avatar: Joi.string().pattern(
         /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/i,
@@ -49,6 +47,8 @@ app.use(
   }),
   createUser,
 );
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
 app.use((req, res) => {
   res.status(404).send({ message: 'Страница не найдена.' });
 });
