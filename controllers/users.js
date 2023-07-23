@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const { NotFoundError } = require('../errors/NotFoundError');
+const {ConflictError} = require("../errors/ConflictError");
+const {errors} = require("celebrate");
 
 const createUser = (req, res, next) => {
   const {
@@ -30,7 +32,13 @@ const createUser = (req, res, next) => {
         avatar: user.avatar,
       });
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.code === 11000) {
+        next(new ConflictError('Такой пользователь уже существует'));
+        return;
+      }
+      next(error);
+    });
 };
 
 const getUsers = (req, res, next) => {
