@@ -22,7 +22,13 @@ const createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      res.send(user);
+      res.send({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        about: user.about,
+        avatar: user.avatar,
+      });
     })
     .catch(next);
 };
