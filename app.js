@@ -11,6 +11,7 @@ const cardsRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/error-handler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { cors } = require('./middlewares/cors');
 
 const { login, createUser } = require('./controllers/users');
 const { NotFoundError } = require('./errors/NotFoundError');
@@ -27,7 +28,13 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
+app.use(cors);
 app.use(requestLogger);
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 app.use(
   '/signin',
   signinValidation,
