@@ -10,6 +10,7 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/error-handler');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { login, createUser } = require('./controllers/users');
 const { NotFoundError } = require('./errors/NotFoundError');
@@ -26,6 +27,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
+app.use(requestLogger);
 app.use(
   '/signin',
   signinValidation,
@@ -38,6 +40,7 @@ app.use(
 );
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
+app.use(errorLogger);
 app.use((req, res, next) => {
   next(new NotFoundError('Страница не найдена.'));
 });
