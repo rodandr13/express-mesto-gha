@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
-require('dotenv').config();
 
 const rateLimit = require('express-rate-limit');
 const usersRouter = require('./routes/users');
