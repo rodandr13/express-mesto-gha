@@ -35,22 +35,14 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-app.use(
-  '/signin',
-  signinValidation,
-  login,
-);
-app.use(
-  '/signup',
-  signupValidation,
-  createUser,
-);
+app.use('/signin', signinValidation, login);
+app.use('/signup', signupValidation, createUser);
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
-app.use(errorLogger);
-app.use((req, res, next) => {
+app.use(auth, (req, res, next) => {
   next(new NotFoundError('Страница не найдена.'));
 });
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 app.listen(PORT);

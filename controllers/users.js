@@ -6,6 +6,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../models/user');
 const { NotFoundError } = require('../errors/NotFoundError');
 const { ConflictError } = require('../errors/ConflictError');
+const { ValidationError } = require('../errors/ValidationError');
 
 const createUser = (req, res, next) => {
   const {
@@ -36,6 +37,10 @@ const createUser = (req, res, next) => {
     .catch((error) => {
       if (error.code === 11000) {
         next(new ConflictError('Такой пользователь уже существует'));
+        return;
+      }
+      if (error.name === 'ValidationError') {
+        next(new ValidationError('Переданы некорректные данные.'));
         return;
       }
       next(error);
@@ -78,7 +83,13 @@ const getUser = (req, res, next) => {
       }
       res.send(user);
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new ValidationError('Недопустимый _id пользователя.'));
+      } else {
+        next(error);
+      }
+    });
 };
 
 const updateUser = (req, res, next) => {
@@ -91,7 +102,13 @@ const updateUser = (req, res, next) => {
       }
       res.send(user);
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        next(new ValidationError('Недопустимый _id пользователя.'));
+      } else {
+        next(error);
+      }
+    });
 };
 
 const updateAvatar = (req, res, next) => {
@@ -104,13 +121,22 @@ const updateAvatar = (req, res, next) => {
       }
       res.send(user);
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new ValidationError('Переданы некорректные данные.'));
+      } else {
+        next(error);
+      }
+    });
 };
 
 const getCurrentUser = ((req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
+      }
       res.send(user);
     })
     .catch(next);
